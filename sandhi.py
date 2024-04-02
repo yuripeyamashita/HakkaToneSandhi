@@ -18,7 +18,7 @@ def replace_tone(pinyin_array, idx, offset, num, orig="ˊ", tgt="ˇ"):
 def sixian_sandhi(pinyin_array):
     p24Count = 0
     repeatCount = 1
-
+    pinyin_array = pinyin_array[:]
     for idx, item in enumerate(pinyin_array):
         if idx != 0 and item == pinyin_array[idx-1]:
             repeatCount += 1
@@ -73,4 +73,22 @@ def sixian_sandhi(pinyin_array):
             # gieuˋ eˋ → gieuˋ eˇ
             pinyin_array[idx] = "eˇ"
 
+    return pinyin_array
+
+
+endings_array = ["iib", "ib", "eb", "ieb", "ab", "iab", "iid", "id", "ed", "ied", "ued",
+                 "ad", "uad", "od", "iod", "ud", "iud", "ag", "iag", "uag", "og", "iog", "ug", "iug"]
+
+
+def hailu_sandhi(pinyin_array):
+    for idx, item in enumerate(pinyin_array):
+        item = item.strip()
+        # 上聲（24）＋任何聲調 → 中平調（33）＋任何聲調。
+        if ("ˊ" in item and idx < len(pinyin_array)-1 and pinyin_array[idx+1]):
+            pinyin_array[idx] = pinyin_array[idx].replace("ˊ", "+")
+        # 陰入（5）＋任何聲調 → 陽入（2）＋任何聲調。
+        if (item and (item[-1] == "b" or item[-1] == "d" or item[-1] == "g")
+                and idx < len(pinyin_array)-1 and pinyin_array[idx+1]
+                and any(item.endswith(end) for end in endings_array)):
+            pinyin_array[idx] = pinyin_array[idx] + "ˋ"
     return pinyin_array
